@@ -53,7 +53,8 @@ class indexer(object):
         
         finally:
             print "Finished removing all stopwords.."
-    
+
+    # Guess what it does.
     def word_stemmer(self, lst):
         cnt = 0
         try:
@@ -68,4 +69,4 @@ class indexer(object):
             print msg
         
         finally:
-            print "Words left = [" + str(cnt) + "]"
+            print "Stemming finished\nWords left\t[" + str(cnt) + "]"

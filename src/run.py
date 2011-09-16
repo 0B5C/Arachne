@@ -5,6 +5,7 @@ Created on 14.09.2011
 '''
 import indexer
 from time import time
+import database
 
 def main():
     ind = indexer.indexer()
@@ -20,7 +21,8 @@ def main():
     print "After:\t" + str(regex_result['wordcounter'] - res['deleted'])
     print "Stemming in progress.."
     sol = ind.word_stemmer(res['words'])
-    print sol
+    db = database.Database()
+    db.exec_insert(sol, "doc1")
 
 if __name__ == '__main__':
     main()
