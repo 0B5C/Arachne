@@ -3,32 +3,38 @@ Created on 14.09.2011
 
 @author: kq
 '''
-import json
-import re
+from json import load
+from re import finditer, compile
 import string
+from stemming.porter2 import stem
 
 class indexer(object):
     def __init__(self):
         self.stopwords = open("stopwords.lst", "r")
-        self.stopwordsList = set(json.load(self.stopwords))
+        self.stopwordsList = set(load(self.stopwords))
         self.to_index = open("text.txt", "r")
-        self.pattern = re.compile(r"[a-zA-Z0-9]{2,35}") 
+        self.pattern = compile(r"[a-zA-Z0-9]{2,35}") 
         
-        # TODO: GOOGLE> Stream parser
-        
+    # Check our Textdocument with our regex (self.pattern)
     def check_document(self, document=open("text.txt", 'r')):
         try:
+            # init some vars we need
             words = 0
             out = list()
-            for match in re.finditer(self.pattern, document.read()):
+            
+            # for every match we find with our regex
+            for match in finditer(self.pattern, document.read()):
+                # increment words with itself plus one and append the 
+                # lowercase representation of the string to our list
                 words = words + 1
                 out.append(string.lower(match.group(0)))
             return {'wordcounter' : words, 'words' : set(out)}
         
         except ValueError as msg:
-            print "ValueError: " + str(msg)
+            print "ValueError: " + str(msg) + "\n"
         
         finally:
+            print "Finished checking document (" + str(document.name) + ").."
             document.close()
     
     # This function removes every stopword (words we don't need to index 'cuz they are not necessary for searchquerys)
@@ -43,7 +49,23 @@ class indexer(object):
             return  {'deleted' : delCounter, 'words' : lst}
 
         except ValueError as msg:
-            print "\nSomething, somewhere went terrible wrong.\nValueError: " + str(msg) + "\n"
+            print "ValueError: " + str(msg) + "\n"
+        
+        finally:
+            print "Finished removing all stopwords.."
     
-    def word_stemmer(self, document_as_list):
-        pass
+    def word_stemmer(self, lst):
+        cnt = 0
+        try:
+            word_set = set(lst)
+            out = list()
+            for item in word_set:
+                cnt = cnt + 1
+                out.append(stem(item))
+            return set(out)
+        
+        except Exception as msg:
+            print msg
+        
+        finally:
+            print "Words left = [" + str(cnt) + "]"
