@@ -4,25 +4,28 @@ Created on 14.09.2011
 @author: kq
 '''
 import indexer
+import db_communication
 from time import time
-import database
 
 def main():
+    start = time()
     ind = indexer.indexer()
-    t_regex_start = time()
     regex_result = ind.check_document()
-    t_regex_end = time()
-    print "RegEx:\t\t" + str(t_regex_end - t_regex_start) + " seconds"
-    print "Before:\t" + str(regex_result['wordcounter'])
-    t_rem_start = time()
     res = ind.remove_stopwords(regex_result['words'])
-    t_rem_end = time()
-    print "Removing:\t" + str(t_rem_end - t_rem_start) + " seconds"
-    print "After:\t" + str(regex_result['wordcounter'] - res['deleted'])
-    print "Stemming in progress.."
     sol = ind.word_stemmer(res['words'])
-    db = database.Database()
-    db.exec_insert(sol, "doc1")
+
+    docpath = "/home/kq/test.txt" # This should be the path to the document we indexed
+    docID = ind.create_unique_docID(docpath)
+    #create conform dict:
+    store_me = dict()
+    for item in sol:
+        store_me[item] = { docID['uuid'] : '' }
+    db = db_communication.db_com()
+    db.multi_set_words(store_me)
+    db.set_docID(docID)
+    end = time()
+    
+    print str(end - start)
 
 if __name__ == '__main__':
     main()

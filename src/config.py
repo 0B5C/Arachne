@@ -1,11 +1,9 @@
 '''
 Created on 14.09.2011
-@note: This is a DBMS.
 @author: kq
 '''
 import ConfigParser
 from ConfigParser import NoOptionError
-from fileinput import close
 
 class config(object):
     

@@ -1,20 +1,24 @@
 '''
 Created on 14.09.2011
-
+The indexer filters textdocuments for wordstems
+and returns everything as a dict()
 @author: kq
 '''
+
 from json import load
 from re import finditer, compile
 import string
 from stemming.porter2 import stem
+from hashlib import sha512, sha256
+import uuid
 
 class indexer(object):
     def __init__(self):
         self.stopwords = open("stopwords.lst", "r")
         self.stopwordsList = set(load(self.stopwords))
         self.to_index = open("text.txt", "r")
-        self.pattern = compile(r"[a-zA-Z0-9]{2,35}") 
-        
+        self.pattern = compile(r"[a-zA-Z0-9]{2,35}")
+
     # Check our Textdocument with our regex (self.pattern)
     def check_document(self, document=open("text.txt", 'r')):
         try:
@@ -32,7 +36,7 @@ class indexer(object):
         
         except ValueError as msg:
             print "ValueError: " + str(msg) + "\n"
-        
+
         finally:
             print "Finished checking document (" + str(document.name) + ").."
             document.close()
@@ -64,9 +68,16 @@ class indexer(object):
                 cnt = cnt + 1
                 out.append(stem(item))
             return set(out)
-        
+
         except Exception as msg:
             print msg
         
         finally:
             print "Stemming finished\nWords left\t[" + str(cnt) + "]"
+    
+    def create_unique_docID(self, docpath):
+        docID = str(uuid.uuid1())
+        return {
+                'uuid' : docID,
+                'path' : docpath
+                }
