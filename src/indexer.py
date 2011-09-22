@@ -7,77 +7,81 @@ and returns everything as a dict()
 
 from json import load
 from re import finditer, compile
-import string
 from stemming.porter2 import stem
-from hashlib import sha512, sha256
 import uuid
+from time import time
 
 class indexer(object):
     def __init__(self):
         self.stopwords = open("stopwords.lst", "r")
         self.stopwordsList = set(load(self.stopwords))
-        self.to_index = open("text.txt", "r")
-        self.pattern = compile(r"[a-zA-Z0-9]{2,35}")
+        self.pattern = compile(r"[\b\w\b]{2,35}")
+        self.totalT = float()
 
     # Check our Textdocument with our regex (self.pattern)
     def check_document(self, document=open("text.txt", 'r')):
+        if self.totalT != 0.0:
+            self.totalT = 0.0
+        s = time()
         try:
+            
             # init some vars we need
-            words = 0
-            out = list()
+            out = set()
             
             # for every match we find with our regex
             for match in finditer(self.pattern, document.read()):
                 # increment words with itself plus one and append the 
                 # lowercase representation of the string to our list
-                words = words + 1
-                out.append(string.lower(match.group(0)))
-            return {'wordcounter' : words, 'words' : set(out)}
+                out.add(match.group(0).lower())
+            return {'words' : out}
         
         except ValueError as msg:
             print "ValueError: " + str(msg) + "\n"
 
         finally:
-            print "Finished checking document (" + str(document.name) + ").."
+            en = time() - s
+            #print "[--Run--]\t- checking document (" + str(document.name) + ")\t[" + str(en) + "s]"
+            self.totalT = self.totalT + en
             document.close()
-    
+
     # This function removes every stopword (words we don't need to index 'cuz they are not necessary for searchquerys)
     def remove_stopwords(self, lst):
+        s = time()
         wordlist = lst
         try:
-            delCounter = 0
             for stopword in self.stopwordsList:
                 if stopword in wordlist:
-                    delCounter = delCounter +1
                     lst.remove(stopword)
-            return  {'deleted' : delCounter, 'words' : lst}
+            return  {'words' : set(lst)}
 
         except ValueError as msg:
             print "ValueError: " + str(msg) + "\n"
-        
+
         finally:
-            print "Finished removing all stopwords.."
+            en = time() - s
+            #print "[--Run--]\t- Removing stopwords\t\t\t\t[" + str(en) + "s]"
+            self.totalT = self.totalT + en
 
     # Guess what it does.
+    # todo ask for type and cast to set if this is a list
     def word_stemmer(self, lst):
-        cnt = 0
+        s = time()
         try:
             word_set = set(lst)
-            out = list()
+            out = set()
             for item in word_set:
-                cnt = cnt + 1
-                out.append(stem(item))
-            return set(out)
+                out.add(stem(item))
+            return out
 
         except Exception as msg:
             print msg
-        
+
         finally:
-            print "Stemming finished\nWords left\t[" + str(cnt) + "]"
-    
+            en = time() - s
+            #print "[--Run--]\t- Stemming words\t\t\t\t[" + str(en) + "s]"
+            self.totalT = self.totalT + en
+            #print "TOTAL: " + str(self.totalT) + "\b",
+
     def create_unique_docID(self, docpath):
         docID = str(uuid.uuid1())
-        return {
-                'uuid' : docID,
-                'path' : docpath
-                }
+        return {'uuid' : docID, 'path' : docpath}

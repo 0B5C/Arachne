@@ -1,21 +1,16 @@
+'''
+The whole database work is done here
+Created on 19.09.2011
+@author: kq
+'''
 import pycassa
-
+# TODO: Exceptionhandling
 class db_com(object):
+
     def __init__(self):
-        self.pool = pycassa.connect('indexer', ['localhost:9160'])
+        self.pool = pycassa.connect('indexer', ['194.9.127.241:9160'])
         self.col_fam_name = 'indexx'
         self.col_fam = pycassa.ColumnFamily(self.pool, self.col_fam_name)
-
-    def set(self, word, documentID):
-        if self.col_fam_name != 'indexx':
-            self.col_fam_name = 'indexx'
-        try:
-            self.col_fam.insert(word, {documentID : ''})
-            return 0
-        
-        except Exception as msg:
-            print msg
-            return -1
 
     '''
     The dictionary you throw into this should look like:
@@ -37,7 +32,6 @@ class db_com(object):
         if self.col_fam_name != 'indexx':
             self.col_fam_name = 'indexx'
             self.col_fam = pycassa.ColumnFamily(self.pool, self.col_fam_name)
-            print self.col_fam_name
 
         try:
             self.col_fam.batch_insert(indexer_resultset)
@@ -46,19 +40,16 @@ class db_com(object):
         except Exception as msg:
             print msg
             return -1
-    
+
+    # The set_docID function saves a docID into our database (CF: docids)
     def set_docID(self, docID_dict):
         if self.col_fam_name != 'docids':
             self.col_fam_name = 'docids'
             self.col_fam = pycassa.ColumnFamily(self.pool, self.col_fam_name)
-            print self.col_fam_name
 
         try:
             self.col_fam.insert(docID_dict['uuid'], {'path' : docID_dict['path']})
             return 0
         except Exception as msg:
             print msg
-            return 1
-
-    def get(self, key):
-        pass
+            return -1

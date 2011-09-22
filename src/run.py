@@ -1,31 +1,29 @@
 '''
+This is our main function which executes the crawler
 Created on 14.09.2011
-
 @author: kq
 '''
-import indexer
-import db_communication
 from time import time
-
+import crawler
 def main():
+    print '''
+                           .__                   
+ _____ ____________    ____ |  |__   ____   ____  
+ \__  \\_  __ \__  \ _/ ___\|  |  \ /    \_/ __ \ 
+  / __ \|  | \// __ \\  \___|   Y  \   |  \  ___/ 
+ (____  /__|  (____  /\___  >___|  /___|  /\___  >
+      \/           \/     \/     \/     \/     \/ 
+v0.1 -                Kai Oliver Quambusch / 2011
+    '''
+    inp = raw_input("-Press Enter to start-")
+    print inp
+    crawl = crawler.crawler()
     start = time()
-    ind = indexer.indexer()
-    regex_result = ind.check_document()
-    res = ind.remove_stopwords(regex_result['words'])
-    sol = ind.word_stemmer(res['words'])
-
-    docpath = "/home/kq/test.txt" # This should be the path to the document we indexed
-    docID = ind.create_unique_docID(docpath)
-    #create conform dict:
-    store_me = dict()
-    for item in sol:
-        store_me[item] = { docID['uuid'] : '' }
-    db = db_communication.db_com()
-    db.multi_set_words(store_me)
-    db.set_docID(docID)
+    filelist = crawl.getFilelist()
+    crawl.crawlFilelist(filelist)
     end = time()
-    
-    print str(end - start)
+
+    print "[FINISH] - " + str(end - start) +"s"
 
 if __name__ == '__main__':
     main()
