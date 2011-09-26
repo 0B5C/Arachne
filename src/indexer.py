@@ -1,7 +1,8 @@
 '''
-Created on 14.09.2011
 The indexer filters textdocuments for wordstems
 and returns everything as a dict()
+
+Created on 14.09.2011
 @author: kq
 '''
 
@@ -24,17 +25,17 @@ class indexer(object):
             self.totalT = 0.0
         s = time()
         try:
-            
+
             # init some vars we need
             out = set()
-            
+
             # for every match we find with our regex
             for match in finditer(self.pattern, document.read()):
                 # increment words with itself plus one and append the 
                 # lowercase representation of the string to our list
                 out.add(match.group(0).lower())
             return {'words' : out}
-        
+
         except ValueError as msg:
             print "ValueError: " + str(msg) + "\n"
 
@@ -63,7 +64,6 @@ class indexer(object):
             self.totalT = self.totalT + en
 
     # Guess what it does.
-    # todo ask for type and cast to set if this is a list
     def word_stemmer(self, lst):
         s = time()
         try:

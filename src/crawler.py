@@ -7,19 +7,26 @@ Created on 19.09.2011
 '''
 
 import dircache
-import indexer
-import db_communication
+from getpass import getuser as User
 import sys
+
+import indexer
+import chunksys
+import db_communication
 
 class crawler(object):
     def __init__(self):
         self.index = indexer.indexer()
         self.database = db_communication.db_com()
         self.base_dir = ""
+        self.store_me = dict()
+        self.documentCount = 0 # Count the documents you crawled
+        self.chunk = chunksys.chunksys()
+        self.chunkstore = list()
 
     # Scans a folder for files
     # TODO: Only scan for .txt files
-    def getFilelist(self, directory="/home/kq/test/"):
+    def getFilelist(self, directory="/home/" + User() + "/test/small/"):
         self.base_dir = directory
         return dircache.listdir(directory)
 
@@ -40,14 +47,27 @@ class crawler(object):
             res = self.index.word_stemmer(res['words'])
             # save docID to database
             self.database.set_docID(docID)
-            
+
             # create dictionary which contains all wordstems
             # should look like this:
             # {wordstem : { docID : '' }}
             for item in res:
-                store_me[item] = { docID['uuid'] : '' }
-            sys.stdout.write( "[-->]\t- Run "+str(i)+" finished of "+str(totalDocs)+"\r")
+                if store_me.has_key(item) == True:
+                    store_me[item][docID['uuid']] = ''
+                    # store_me[item].update( { docID['uuid'] : '' })
+                else:
+                    store_me[item] = {docID['uuid'] : ''}
+            self.documentCount += 1
+            if self.documentCount == 10:
+                self.documentCount = 0
+                self.chunkstore.append(self.chunk.createChunk(store_me, self.documentCount))
+            sys.stdout.write( "[-->]\t- Run "+str(i)+" of "+str(totalDocs)+" finished.\r")
             sys.stdout.flush()
+
+        # be sure to send _all_ chunks:
+        tmp_chunk = self.chunk.createChunk(store_me, self.documentCount, True)
+        self.chunkstore.append(tmp_chunk)
+        self.chunk.transfer(self.chunkstore)
+
         print "Finished indexing..\nSaving to cassandra.. This could take another while."
-        self.database.multi_set_words(store_me)
         print "\n\n[FINISH] - Terminating, dude."

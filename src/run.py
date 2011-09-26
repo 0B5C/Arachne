@@ -7,7 +7,7 @@ from time import time
 import crawler
 def main():
     print '''
-                           .__                   
+                            .__                   
  _____ ____________    ____ |  |__   ____   ____  
  \__  \\_  __ \__  \ _/ ___\|  |  \ /    \_/ __ \ 
   / __ \|  | \// __ \\  \___|   Y  \   |  \  ___/ 
@@ -15,9 +15,10 @@ def main():
       \/           \/     \/     \/     \/     \/ 
 v0.1 -                Kai Oliver Quambusch / 2011
     '''
-    inp = raw_input("-Press Enter to start-")
+    inp = raw_input("-Press the Anykey to start-")
     print inp
     crawl = crawler.crawler()
+    crawl.__init__()
     start = time()
     filelist = crawl.getFilelist()
     crawl.crawlFilelist(filelist)

@@ -7,12 +7,14 @@ import pycassa
 # TODO: Exceptionhandling
 class db_com(object):
 
+    # TODO: Read from config
     def __init__(self):
         self.pool = pycassa.connect('indexer', ['194.9.127.241:9160'])
         self.col_fam_name = 'indexx'
         self.col_fam = pycassa.ColumnFamily(self.pool, self.col_fam_name)
 
     '''
+    # @DEPRECATED:
     The dictionary you throw into this should look like:
     {
     'word0' : {'docID-00' : ''},
@@ -29,6 +31,9 @@ class db_com(object):
     }
     '''
     def multi_set_words(self, indexer_resultset):
+        if indexer_resultset == None:
+            return
+
         if self.col_fam_name != 'indexx':
             self.col_fam_name = 'indexx'
             self.col_fam = pycassa.ColumnFamily(self.pool, self.col_fam_name)
@@ -36,13 +41,16 @@ class db_com(object):
         try:
             self.col_fam.batch_insert(indexer_resultset)
             return 0
-        
+
         except Exception as msg:
-            print msg
+            print "[ERROR] - " + str(msg)
             return -1
 
     # The set_docID function saves a docID into our database (CF: docids)
     def set_docID(self, docID_dict):
+        if docID_dict == None:
+            return
+
         if self.col_fam_name != 'docids':
             self.col_fam_name = 'docids'
             self.col_fam = pycassa.ColumnFamily(self.pool, self.col_fam_name)
@@ -51,5 +59,5 @@ class db_com(object):
             self.col_fam.insert(docID_dict['uuid'], {'path' : docID_dict['path']})
             return 0
         except Exception as msg:
-            print msg
+            print "[ERROR] - " + str(msg)
             return -1
