@@ -15,17 +15,16 @@ from time import time
 class indexer(object):
     def __init__(self):
         self.stopwords = open("stopwords.lst", "r")
-        self.stopwordsList = set(load(self.stopwords))
+        self.stopwordsList = frozenset(load(self.stopwords))
         self.pattern = compile(r"[\b\w\b]{2,35}")
         self.totalT = float()
 
     # Check our Textdocument with our regex (self.pattern)
-    def check_document(self, document=open("text.txt", 'r')):
+    def check_document(self, document):
         if self.totalT != 0.0:
             self.totalT = 0.0
         s = time()
         try:
-
             # init some vars we need
             out = set()
 

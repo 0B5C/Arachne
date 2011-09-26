@@ -4,12 +4,15 @@ Created on 19.09.2011
 @author: kq
 '''
 import pycassa
+
+import config
 # TODO: Exceptionhandling
 class db_com(object):
 
     # TODO: Read from config
     def __init__(self):
-        self.pool = pycassa.connect('indexer', ['194.9.127.241:9160'])
+        cfg = config.config().format_config()
+        self.pool = pycassa.connect('indexer', [str(cfg['server']) + ':' + str(cfg['port'])])
         self.col_fam_name = 'indexx'
         self.col_fam = pycassa.ColumnFamily(self.pool, self.col_fam_name)
 
@@ -30,6 +33,26 @@ class db_com(object):
     'word1' : {'docID-01' : ''}
     }
     '''
+    
+    def localMultiset(self, chunks):
+        if chunks == None:
+            return
+
+        if self.col_fam_name != 'local_indexx':
+            self.col_fam_name = 'local_index'
+            self.pool = pycassa.connect('local_index', ['localhost:9160'])
+            self.col_fam = pycassa.ColumnFamily(self.pool, self.col_fam_name)
+        # TODO: Datenbank beibringen ueber listen zu iterieren
+
+        try:
+            self.col_fam.batch_insert(chunks)
+            return 0
+
+        except Exception as msg:
+            print str(msg)
+            return -1
+
+
     def multi_set_words(self, indexer_resultset):
         if indexer_resultset == None:
             return

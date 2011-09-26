@@ -29,7 +29,6 @@ class crawler(object):
     def getFilelist(self, directory="/home/" + User() + "/test/small/"):
         self.base_dir = directory
         return dircache.listdir(directory)
-
     # do getFilelist and submit list here:
     def crawlFilelist(self, files):
         print "Indexing, this could take a while.."
@@ -67,7 +66,7 @@ class crawler(object):
         # be sure to send _all_ chunks:
         tmp_chunk = self.chunk.createChunk(store_me, self.documentCount, True)
         self.chunkstore.append(tmp_chunk)
+        print "Finished indexing..\nSaving to cassandra.. This could take another while."
         self.chunk.transfer(self.chunkstore)
 
-        print "Finished indexing..\nSaving to cassandra.. This could take another while."
         print "\n\n[FINISH] - Terminating, dude."
